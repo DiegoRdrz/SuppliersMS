@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  suppliers-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: suppliers_db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Admin12345!
+    ports:
+      - "1433:1433"
+    volumes:
+      - suppliers_db_data:/var/opt/mssql
+
+  suppliers-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: suppliers_api
+    depends_on:
+      - suppliers-db
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5001
+      - ConnectionStrings__DefaultConnection=Server=suppliers-db;Database=SuppliersDb;User Id=sa;Password=Admin12345!;TrustServerCertificate=True;
+
+volumes:
+  suppliers_db_data:
